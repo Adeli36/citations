@@ -1,6 +1,8 @@
 name: Envoi d'une citation
 
 on:
+  schedule:
+    - cron: "5 6,7,10,11,18,19 * * *"
   workflow_dispatch:
 
 jobs:
@@ -10,7 +12,21 @@ jobs:
       - name: Récupérer les fichiers du dépôt
         uses: actions/checkout@v4
 
+      - name: Vérifier que c'est une heure d'envoi
+        id: heure
+        run: |
+          HEURE=$(TZ=Europe/Paris date +%H)
+          echo "Il est $HEURE h à Paris"
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "envoyer=oui" >> "$GITHUB_OUTPUT"
+          elif [ "$HEURE" = "08" ] || [ "$HEURE" = "12" ] || [ "$HEURE" = "20" ]; then
+            echo "envoyer=oui" >> "$GITHUB_OUTPUT"
+          else
+            echo "envoyer=non" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Envoyer une citation au hasard
+        if: steps.heure.outputs.envoyer == 'oui'
         env:
           ONESIGNAL_API_KEY: ${{ secrets.ONESIGNAL_API_KEY }}
           ONESIGNAL_APP_ID: "4803d465-d2d3-4968-b996-b572570a759a"
