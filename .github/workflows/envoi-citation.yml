@@ -17,5 +17,5 @@ jobs:
         run: |
           CITATION=$(jq -r '.[]' citations.json | shuf -n 1)
           echo "Citation choisie : $CITATION"
-          CORPS=$(jq -n --arg app "$ONESIGNAL_APP_ID" --arg msg "$CITATION" '{app_id: $app, target_channel: "push", included_segments: ["Subscribed Users"], headings: {en: "Ma dose de motivation"}, contents: {en: $msg}, url: "https://adeli36.github.io/citations/"}')
+          CORPS=$(jq -n --arg app "$ONESIGNAL_APP_ID" --arg msg "$CITATION" '{app_id: $app, target_channel: "push", included_segments: ["Total Subscriptions"], headings: {en: "Ma dose de motivation"}, contents: {en: $msg}, url: "https://adeli36.github.io/citations/"}')
           curl --silent --show-error --fail-with-body --request POST --url https://api.onesignal.com/notifications --header "Authorization: Key $ONESIGNAL_API_KEY" --header "Content-Type: application/json" --data "$CORPS"
