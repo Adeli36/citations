@@ -120,3 +120,34 @@ function basculerFavori() {
 
 boutonFavori.addEventListener("click", basculerFavori);
 afficherFavoris();
+const boutonPartager = document.getElementById("bouton-partager");
+const iconePartage = boutonPartager.innerHTML;
+
+async function partager() {
+  if (citations.length === 0) return;
+
+  const texte = "« " + citationAffichee() + " »";
+  const lien = "https://adeli36.github.io/citations/";
+
+  if (navigator.share) {
+    try {
+      await navigator.share({
+        title: "Ma dose de motivation",
+        text: texte,
+        url: lien
+      });
+    } catch (erreur) {
+      // La personne a fermé le menu de partage : rien à faire.
+    }
+  } else if (navigator.clipboard) {
+    try {
+      await navigator.clipboard.writeText(texte + "\n" + lien);
+      boutonPartager.textContent = "✓";
+      setTimeout(() => {
+        boutonPartager.innerHTML = iconePartage;
+      }, 1500);
+    } catch (erreur) {}
+  }
+}
+
+boutonPartager.addEventListener("click", partager);
