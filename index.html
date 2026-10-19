@@ -22,10 +22,24 @@
 </script>
 </head>
 <body>
-  <main>
+    <main id="page-accueil" class="page">
     <p id="citation">Chargement...</p>
-    <button id="bouton">Nouvelle citation</button>
+    <div class="actions">
+      <button id="bouton">Nouvelle citation</button>
+      <button id="bouton-favori" aria-label="Ajouter aux favoris">☆</button>
+    </div>
   </main>
+
+  <main id="page-favoris" class="page" hidden>
+    <h1>Mes favoris</h1>
+    <p class="vide" id="message-vide">Tu n'as pas encore de favoris.</p>
+    <ul id="liste-favoris"></ul>
+  </main>
+  <nav>
+    <button id="nav-accueil" class="actif">Accueil</button>
+    <button id="nav-favoris">Favoris</button>
+  </nav>
+
   <script src="script.js"></script>
 </body>
 </html>

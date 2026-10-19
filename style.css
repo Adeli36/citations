@@ -8,11 +8,15 @@ body {
   color: #ffffff;
   font-family: 'Outfit', system-ui, -apple-system, sans-serif;
   text-align: center;
+  padding-bottom: 80px;
+  box-sizing: border-box;
 }
 
 main {
   padding: 24px;
   max-width: 480px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 #citation {
@@ -22,7 +26,7 @@ main {
   margin-bottom: 40px;
 }
 
-button {
+#bouton {
   font-family: inherit;
   font-size: 1rem;
   font-weight: 600;
@@ -34,6 +38,89 @@ button {
   cursor: pointer;
 }
 
-button:active {
+#bouton:active {
   background: #bdbdbd;
+}
+
+.vide {
+  color: #9a9a9a;
+}
+
+nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  background: #1b1b1b;
+  border-top: 1px solid #2a2a2a;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+nav button {
+  flex: 1;
+  padding: 18px 0;
+  border: none;
+  background: transparent;
+  color: #8a8a8a;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+nav button.actif {
+  color: #ffffff;
+  font-weight: 600;
+}
+.actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
+#bouton-favori {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: 1px solid #3a3a3a;
+  background: transparent;
+  color: #8a8a8a;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+#bouton-favori.favori {
+  color: #ffffff;
+  border-color: #ffffff;
+}
+
+#liste-favoris {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  text-align: left;
+}
+
+#liste-favoris li {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 0;
+  border-bottom: 1px solid #2a2a2a;
+}
+
+#liste-favoris span {
+  flex: 1;
+  line-height: 1.4;
+}
+
+.retirer {
+  border: none;
+  background: transparent;
+  color: #8a8a8a;
+  font-size: 1.3rem;
+  cursor: pointer;
 }
