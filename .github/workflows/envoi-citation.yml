@@ -2,8 +2,16 @@ name: Envoi d'une citation
 
 on:
   schedule:
-    - cron: "5 6,7,10,11,18,19 * * *"
+    - cron: "30 3 * * *"
   workflow_dispatch:
+    inputs:
+      mode:
+        description: "immediat = une citation tout de suite / planifier = programmer les envois de 8h, 12h et 20h pas encore passés"
+        type: choice
+        options:
+          - immediat
+          - planifier
+        default: immediat
 
 jobs:
   envoyer:
@@ -12,26 +20,33 @@ jobs:
       - name: Récupérer les fichiers du dépôt
         uses: actions/checkout@v4
 
-      - name: Vérifier que c'est une heure d'envoi
-        id: heure
-        run: |
-          HEURE=$(TZ=Europe/Paris date +%H)
-          echo "Il est $HEURE h à Paris"
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            echo "envoyer=oui" >> "$GITHUB_OUTPUT"
-          elif [ "$HEURE" = "08" ] || [ "$HEURE" = "12" ] || [ "$HEURE" = "20" ]; then
-            echo "envoyer=oui" >> "$GITHUB_OUTPUT"
-          else
-            echo "envoyer=non" >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: Envoyer une citation au hasard
-        if: steps.heure.outputs.envoyer == 'oui'
+      - name: Envoyer ou programmer les citations
         env:
           ONESIGNAL_API_KEY: ${{ secrets.ONESIGNAL_API_KEY }}
           ONESIGNAL_APP_ID: "4803d465-d2d3-4968-b996-b572570a759a"
+          MODE: ${{ github.event_name == 'schedule' && 'planifier' || inputs.mode }}
         run: |
-          CITATION=$(jq -r '.[]' citations.json | shuf -n 1)
-          echo "Citation choisie : $CITATION"
-          CORPS=$(jq -n --arg app "$ONESIGNAL_APP_ID" --arg msg "$CITATION" '{app_id: $app, target_channel: "push", included_segments: ["Total Subscriptions"], headings: {en: "Ma dose de motivation"}, contents: {en: $msg}, url: "https://adeli36.github.io/citations/"}')
-          curl --silent --show-error --fail-with-body --request POST --url https://api.onesignal.com/notifications --header "Authorization: Key $ONESIGNAL_API_KEY" --header "Content-Type: application/json" --data "$CORPS"
+          envoyer() {
+            local CORPS
+            CORPS=$(jq -n --arg app "$ONESIGNAL_APP_ID" --arg msg "$1" --arg quand "$2" '{app_id: $app, target_channel: "push", included_segments: ["Total Subscriptions"], headings: {en: "Ma dose de motivation"}, contents: {en: $msg}, url: "https://adeli36.github.io/citations/"} + (if $quand == "" then {} else {send_after: $quand} end)')
+            curl --silent --show-error --fail-with-body --request POST --url https://api.onesignal.com/notifications --header "Authorization: Key $ONESIGNAL_API_KEY" --header "Content-Type: application/json" --data "$CORPS"
+            echo
+          }
+
+          if [ "$MODE" = "planifier" ]; then
+            mapfile -t CHOIX < <(jq -r '.[]' citations.json | shuf -n 3)
+            HEURES=(08:00 12:00 20:00)
+            for i in 0 1 2; do
+              QUAND=$(TZ=Europe/Paris date -d "today ${HEURES[$i]}" +%Y-%m-%dT%H:%M:%S%:z)
+              if [ "$(date -d "$QUAND" +%s)" -le "$(date +%s)" ]; then
+                echo "$QUAND : heure déjà passée, ignorée"
+                continue
+              fi
+              echo "Programmation à $QUAND : ${CHOIX[$i]}"
+              envoyer "${CHOIX[$i]}" "$QUAND"
+            done
+          else
+            CITATION=$(jq -r '.[]' citations.json | shuf -n 1)
+            echo "Envoi immédiat : $CITATION"
+            envoyer "$CITATION" ""
+          fi
